@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require File.expand_path('person.rb', __dir__)
 # Student class
 class Student < Person
