@@ -1,8 +1,8 @@
-require File.expand_path('person.rb', __dir__)
+require './person'
 # Student class
 class Student < Person
-  def initialize(age, permission, name, classroom)
-    super(age, permission, name)
+  def initialize(age, name, classroom, parent_permission: true)
+    super(age, name, parent_permission)
     @classroom = classroom
   end
 
