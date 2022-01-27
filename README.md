@@ -2,6 +2,9 @@
 
 For the purpose of learning, I'm building a school library. In this initial step, I  will implement the classes to represent students and teachers.
 
+### Prerequisites
+You must have Ruby installed on your local machine
+
 
 ## Getting Started
 
