@@ -61,4 +61,33 @@ class App
     @books.push(new_book)
     puts 'Book created successfully!'
   end
+
+  def create_rental
+    puts 'Select a book from the following list by number: '
+    list_books
+    user_book_input = gets.chomp.to_i
+
+    if user_book_input < @books.length
+      book = @books[user_book_input]
+    else
+      puts 'Invalid selection'
+    end
+
+    puts 'Select a person from the following list by number'
+    list_people
+    user_person_input = gets.chomp.to_i
+
+    if user_person_input < @people.length
+      person = @people[user_person_input]
+    else
+      puts 'Invalid selection'
+    end
+
+    puts 'Date: '
+    date = gets.chomp
+
+    new_rental = Rental.new(date, book, person)
+    @rentals.push(new_rental)
+    puts 'Rental created successfully!'
+  end
 end
