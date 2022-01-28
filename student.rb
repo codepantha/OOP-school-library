@@ -1,11 +1,13 @@
+# frozen_string_literal: true
+
 require './person'
 # Student class
 class Student < Person
   attr_reader :classroom
 
   def initialize(age, name, classroom, parent_permission: true)
-    super(age, name, parent_permission)
     @classroom = classroom
+    super(age, name, parent_permission: parent_permission)
   end
 
   def play_hookey
