@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require './person'
 require './book'
 require './rental'
@@ -13,6 +11,21 @@ class App
     @books = []
     @people = []
     @rentals = []
+    @choices = [
+      'List all books', 'List all people', 'Create a person', 'Create a book',
+      'Create a rental', 'List all rentals for a given person id', 'Exit'
+    ]
+  end
+
+  attr_reader :choices
+
+  def list_books_or_people(input)
+    case input
+    when 1
+      list_books
+    when 2
+      list_people
+    end
   end
 
   def list_books
@@ -22,7 +35,16 @@ class App
   end
 
   def list_people
-    @people.each_with_index { |person, i| puts "#{i}) Name: #{person.name}, ID: #{person.age}, Age: #{person.age}" }
+    @people.each_with_index { |person, i| puts "#{i}) Name: #{person.name}, ID: #{person.id}, Age: #{person.age}" }
+  end
+
+  def create_person_or_create_book(input)
+    case input
+    when 3
+      create_person
+    when 4
+      create_book
+    end
   end
 
   def create_person
@@ -62,16 +84,21 @@ class App
     puts 'Book created successfully!'
   end
 
+  def create_or_list_rental(input)
+    case input
+    when 5
+      create_rental
+    when 6
+      list_rentals_for_a_given_person_id
+    end
+  end
+
   def create_rental
     puts 'Select a book from the following list by number: '
     list_books
     user_book_input = gets.chomp.to_i
 
-    if user_book_input < @books.length
-      book = @books[user_book_input]
-    else
-      puts 'Invalid selection'
-    end
+    book = user_book_input < @books.length ? @books[user_book_input] : ''
 
     puts 'Select a person from the following list by number'
     list_people
@@ -85,13 +112,14 @@ class App
 
     puts 'Date: '
     date = gets.chomp
-
     new_rental = Rental.new(date, book, person)
     @rentals.push(new_rental)
     puts 'Rental created successfully!'
   end
 
   def list_rentals_for_a_given_person_id
+    puts 'List of persons with IDs'
+    list_people
     puts 'ID of person: '
     person_id = gets.chomp.to_i
 
@@ -100,3 +128,31 @@ class App
     end
   end
 end
+
+def main
+  app = App.new
+
+  puts 'Please choose an option by entering a number:'
+  app.choices.each_with_index { |choice, index| puts "#{index + 1}. #{choice}" }
+
+  user_choice = gets.chomp.to_i
+  while user_choice != 7
+    case user_choice
+    when 1, 2
+      app.list_books_or_people(user_choice)
+    when 3, 4
+      app.create_person_or_create_book(user_choice)
+    when 5, 6
+      app.create_or_list_rental(user_choice)
+    else
+      puts 'Select a valid option'
+    end
+
+    puts 'Please choose an option by entering a number:'
+    app.choices.each_with_index { |choice, index| puts "#{index + 1}. #{choice}" }
+
+    user_choice = gets.chomp.to_i
+  end
+end
+
+main
