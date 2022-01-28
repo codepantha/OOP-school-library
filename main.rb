@@ -35,7 +35,7 @@ class App
   end
 
   def list_people
-    @people.each_with_index { |person, i| puts "#{i}) Name: #{person.name}, ID: #{person.id}, Age: #{person.age}" }
+    @people.each_with_index { |person, i| puts "#{i}) Name: #{person.name}, ID: #{person.age}, Age: #{person.age}" }
   end
 
   def create_person_or_create_book(input)
