@@ -5,70 +5,13 @@ require './classroom'
 require './student'
 require './teacher'
 
-# App class
-class App
-  def initialize
-    @books = []
-    @people = []
-    @rentals = []
-    @choices = [
-      'List all books', 'List all people', 'Create a person', 'Create a book',
-      'Create a rental', 'List all rentals for a given person id', 'Exit'
-    ]
-  end
-
-  attr_reader :choices
-
-  def create_or_list_rental(input)
-    case input
-    when 5
-      create_rental
-    when 6
-      list_rentals_for_a_given_person_id
-    end
-  end
-
-  def create_rental
-    puts 'Select a book from the following list by number: '
-    list_books
-    user_book_input = gets.chomp.to_i
-
-    book = user_book_input < @books.length ? @books[user_book_input] : ''
-
-    puts 'Select a person from the following list by number'
-    list_people
-    user_person_input = gets.chomp.to_i
-
-    if user_person_input < @people.length
-      person = @people[user_person_input]
-    else
-      puts 'Invalid selection'
-    end
-
-    puts 'Date: '
-    date = gets.chomp
-    new_rental = Rental.new(date, book, person)
-    @rentals.push(new_rental)
-    puts 'Rental created successfully!'
-  end
-
-  def list_rentals_for_a_given_person_id
-    puts 'List of persons with IDs'
-    list_people
-    puts 'ID of person: '
-    person_id = gets.chomp.to_i
-
-    @rentals.each do |rental|
-      puts "Date: #{rental.date}, Book #{rental.book.title} by #{rental.book.author}" if rental.person.id == person_id
-    end
-  end
-end
-
 # CRPeople for create and list persons
 class CRPeople
   def initialize
     @people = []
   end
+
+  attr_reader :people
 
   def list_people
     @people.each_with_index do |person, i|
@@ -114,7 +57,7 @@ class CRBook
     @books = []
   end
 
-  attr_accessor :books
+  attr_reader :books
 
   def create_book
     print 'Title: '
@@ -133,14 +76,69 @@ class CRBook
   end
 end
 
+# this class is used to create/read rentals
+class CRRentals
+  def initialize(books, people)
+    @books = books
+    @people = people
+    @rentals = []
+    @book_input = nil
+    @person_input = nil
+  end
+
+  def ask_for_book_input
+    puts 'Select a book from the following list by number: '
+    @books.list_books
+    user_book_input = gets.chomp.to_i
+    @book_input = user_book_input < @books.books.length ? @books.books[user_book_input] : ''
+  end
+
+  def ask_for_person_input
+    puts 'Select a person from the following list by number'
+    @people.list_people
+    user_person_input = gets.chomp.to_i
+
+    if user_person_input < @people.people.length
+      @person_input = @people.people[user_person_input]
+    else
+      puts 'Invalid Selection'
+    end
+  end
+
+  def create_rental_handler
+    ask_for_book_input
+    ask_for_person_input
+    create_rental
+  end
+
+  def create_rental
+    puts 'Date: '
+    date = gets.chomp
+    @rentals << Rental.new(date, @book_input, @person_input) unless @person_input.nil?
+    puts 'Rental created successfully!'
+  end
+
+  def list_rentals_for_a_given_person_id
+    puts 'List of persons with IDs'
+    @people.list_people
+    puts 'ID of person: '
+    person_id = gets.chomp.to_i
+
+    @rentals.each do |rental|
+      puts "Date: #{rental.date}, Book #{rental.book.title} by #{rental.book.author}" if rental.person.id == person_id
+    end
+  end
+end
+
 # Detector class indicates what action should be taken based on user input
 class Detector
   def initialize
     @cr_book = CRBook.new
     @cr_people = CRPeople.new
+    @cr_rentals = CRRentals.new(@cr_book, @cr_people)
   end
 
-  def detect_operation(user_input)
+  def detect_operation_person(user_input)
     if user_input > 2
       user_input.odd? ? @cr_book.create_book : @cr_people.create_person
     elsif user_input.odd?
@@ -148,6 +146,10 @@ class Detector
     else
       @cr_people.list_people
     end
+  end
+
+  def detect_operation_rentals(user_input)
+    user_input == 5 ? @cr_rentals.create_rental_handler : @cr_rentals.list_rentals_for_a_given_person_id
   end
 end
 
@@ -167,9 +169,9 @@ class MenuOptions
   def option_handler(user_choice)
     case user_choice
     when 1, 2, 3, 4
-      @detector.detect_operation(user_choice)
+      @detector.detect_operation_person(user_choice)
     when 5, 6
-      app.create_or_list_rental(user_choice)
+      @detector.detect_operation_rentals(user_choice)
     else
       puts 'Select a valid option'
     end
