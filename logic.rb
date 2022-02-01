@@ -4,15 +4,15 @@ require './rental'
 require './classroom'
 require './student'
 require './teacher'
-require './logic'
 
 # App class
 class App
   def initialize
+    @books = []
     @people = []
     @rentals = []
     @choices = [
-      'List all books', 'List all people', 'Create a book', 'Create a person', 
+      'List all books', 'List all people', 'Create a person', 'Create a book',
       'Create a rental', 'List all rentals for a given person id', 'Exit'
     ]
   end
@@ -95,45 +95,26 @@ class App
   end
 end
 
-class Detector
+class CRBook
   def initialize
-    @cr_book = CRBook.new
+    @books = []
   end
 
-  def detect_operation(userInput)
-    if (userInput > 2)
-      if (userInput.odd?)
-        @cr_book.create_book
-      else
-        # TODO: create a person
-      end
-    elsif (userInput.odd?)
-      @cr_book.list_books
-    else
-      # TODO: list people
+  attr_accessor :books
+
+  def create_book
+    print 'Title: '
+    title = gets.chomp
+    print 'Author: '
+    author = gets.chomp
+    new_book = Book.new(title, author)
+    @books.push(new_book)
+    puts 'Book created successfully!'
+  end
+
+  def list_books
+    @books.each_with_index do |book, index|
+      puts "#{index}) Title: #{book.title}, Author: #{book.author}"
     end
   end
 end
-
-def main
-  app = App.new
-  detector = Detector.new
-
-  loop do
-    puts 'Please choose an option by entering a number:'
-    app.choices.each_with_index { |choice, index| puts "#{index + 1}. #{choice}" }
-    user_choice = gets.chomp.to_i
-
-    case user_choice
-    when 1, 2, 3, 4
-      detector.detect_operation(user_choice)
-    when 5, 6
-      app.create_or_list_rental(user_choice)
-    else
-      puts 'Select a valid option'
-    end
-    break if user_choice == 7
-  end
-end
-
-main
