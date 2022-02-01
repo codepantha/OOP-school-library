@@ -12,43 +12,12 @@ class App
     @people = []
     @rentals = []
     @choices = [
-      'List all books', 'List all people', 'Create a book', 'Create a person', 
+      'List all books', 'List all people', 'Create a book', 'Create a person',
       'Create a rental', 'List all rentals for a given person id', 'Exit'
     ]
   end
 
   attr_reader :choices
-
-  def list_people
-    @people.each_with_index { |person, i| puts "#{i}) Name: #{person.name}, ID: #{person.id}, Age: #{person.age}" }
-  end
-
-  def create_person
-    puts 'Do you want to create a student (1) or teacher (2)? [Input the number]:'
-    user_option = gets.chomp
-
-    print 'Age: '
-    age = gets.chomp
-    print 'Name: '
-    name = gets.chomp
-    if user_option == '1'
-      print 'Has parent permission? [Y/N]'
-      parent_permission = gets.chomp.downcase
-      parent_permission = parent_permission == 'y'
-
-      classroom = Classroom.new('Class A')
-
-      new_student = Student.new(age, name, classroom, parent_permission: parent_permission)
-      @people << new_student
-    else
-      print 'Specialization: '
-      specialization = gets.chomp
-
-      new_teacher = Teacher.new(specialization, age, name)
-      @people << new_teacher
-    end
-    puts 'Person created successfully'
-  end
 
   def create_or_list_rental(input)
     case input
@@ -95,43 +64,14 @@ class App
   end
 end
 
-class Detector
-  def initialize
-    @cr_book = CRBook.new
-  end
-
-  def detect_operation(userInput)
-    if (userInput > 2)
-      if (userInput.odd?)
-        @cr_book.create_book
-      else
-        # TODO: create a person
-      end
-    elsif (userInput.odd?)
-      @cr_book.list_books
-    else
-      # TODO: list people
-    end
-  end
-end
-
 def main
-  app = App.new
-  detector = Detector.new
+  menu_options = MenuOptions.new
 
   loop do
-    puts 'Please choose an option by entering a number:'
-    app.choices.each_with_index { |choice, index| puts "#{index + 1}. #{choice}" }
+    menu_options.display_menu
     user_choice = gets.chomp.to_i
 
-    case user_choice
-    when 1, 2, 3, 4
-      detector.detect_operation(user_choice)
-    when 5, 6
-      app.create_or_list_rental(user_choice)
-    else
-      puts 'Select a valid option'
-    end
+    menu_options.option_handler(user_choice)
     break if user_choice == 7
   end
 end

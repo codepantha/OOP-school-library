@@ -19,37 +19,6 @@ class App
 
   attr_reader :choices
 
-  def list_people
-    @people.each_with_index { |person, i| puts "#{i}) Name: #{person.name}, ID: #{person.id}, Age: #{person.age}" }
-  end
-
-  def create_person
-    puts 'Do you want to create a student (1) or teacher (2)? [Input the number]:'
-    user_option = gets.chomp
-
-    print 'Age: '
-    age = gets.chomp
-    print 'Name: '
-    name = gets.chomp
-    if user_option == '1'
-      print 'Has parent permission? [Y/N]'
-      parent_permission = gets.chomp.downcase
-      parent_permission = parent_permission == 'y'
-
-      classroom = Classroom.new('Class A')
-
-      new_student = Student.new(age, name, classroom, parent_permission: parent_permission)
-      @people << new_student
-    else
-      print 'Specialization: '
-      specialization = gets.chomp
-
-      new_teacher = Teacher.new(specialization, age, name)
-      @people << new_teacher
-    end
-    puts 'Person created successfully'
-  end
-
   def create_or_list_rental(input)
     case input
     when 5
@@ -95,6 +64,51 @@ class App
   end
 end
 
+# CRPeople for create and list persons
+class CRPeople
+  def initialize
+    @people = []
+  end
+
+  def list_people
+    @people.each_with_index do |person, i|
+      print "#{i}) "
+      print person.is_a?(Student) ? '[Student]' : '[Teacher]'
+      puts " Name: #{person.name}, ID: #{person.id}, Age: #{person.age}"
+    end
+  end
+
+  def create_student(age, name)
+    print 'Has parent permission? [Y/N]'
+    parent_permission = gets.chomp.downcase == 'y'
+
+    classroom = Classroom.new('Class A')
+
+    @people << Student.new(age, name, classroom, parent_permission: parent_permission)
+  end
+
+  def create_teacher(age, name)
+    print 'Specialization: '
+    specialization = gets.chomp
+
+    @people << Teacher.new(specialization, age, name)
+  end
+
+  def create_person
+    puts 'Do you want to create a student (1) or teacher (2)? [Input the number]:'
+    user_option = gets.chomp
+
+    print 'Age: '
+    age = gets.chomp
+    print 'Name: '
+    name = gets.chomp
+    user_option == '1' ? create_student(age, name) : create_teacher(age, name)
+
+    puts 'Person created successfully'
+  end
+end
+
+# CRBOOK for create and read from books
 class CRBook
   def initialize
     @books = []
@@ -115,6 +129,49 @@ class CRBook
   def list_books
     @books.each_with_index do |book, index|
       puts "#{index}) Title: #{book.title}, Author: #{book.author}"
+    end
+  end
+end
+
+# Detector class indicates what action should be taken based on user input
+class Detector
+  def initialize
+    @cr_book = CRBook.new
+    @cr_people = CRPeople.new
+  end
+
+  def detect_operation(user_input)
+    if user_input > 2
+      user_input.odd? ? @cr_book.create_book : @cr_people.create_person
+    elsif user_input.odd?
+      @cr_book.list_books
+    else
+      @cr_people.list_people
+    end
+  end
+end
+
+# This class is used to display/handle menu options
+class MenuOptions
+  def initialize
+    @choices = ['List all books', 'List all people', 'Create a book', 'Create a person',
+                'Create a rental', 'List all rentals for a given person id', 'Exit']
+    @detector = Detector.new
+  end
+
+  def display_menu
+    puts 'Please choose an option by entering a number:'
+    @choices.each_with_index { |choice, index| puts "#{index + 1}. #{choice}" }
+  end
+
+  def option_handler(user_choice)
+    case user_choice
+    when 1, 2, 3, 4
+      @detector.detect_operation(user_choice)
+    when 5, 6
+      app.create_or_list_rental(user_choice)
+    else
+      puts 'Select a valid option'
     end
   end
 end
