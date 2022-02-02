@@ -1,3 +1,4 @@
+require 'json'
 require './person'
 require './book'
 require './rental'
@@ -86,6 +87,8 @@ class CRRentals
     @person_input = nil
   end
 
+  attr_reader :rentals
+
   def ask_for_book_input
     puts 'Select a book from the following list by number: '
     @books.list_books
@@ -151,6 +154,21 @@ class Detector
   def detect_operation_rentals(user_input)
     user_input == 5 ? @cr_rentals.create_rental_handler : @cr_rentals.list_rentals_for_a_given_person_id
   end
+
+  def save_and_exit(user_input)
+    if user_input == 7
+      save_data
+      puts 'Saving and exiting app...'
+    else
+      puts 'Invalid Input'
+    end
+  end
+
+  def save_data
+    File.write('./books.json', JSON.dump(@cr_book.books))
+    File.write('./people.json', JSON.dump(@cr_people.people))
+    File.write('./rentals.json', JSON.dump(@cr_rentals.rentals))
+  end
 end
 
 # This class is used to display/handle menu options
@@ -173,7 +191,7 @@ class MenuOptions
     when 5, 6
       @detector.detect_operation_rentals(user_choice)
     else
-      puts 'Select a valid option'
+      @detector.save_and_exit(user_choice)
     end
   end
 end
