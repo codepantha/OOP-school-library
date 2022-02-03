@@ -56,6 +56,10 @@ end
 class CRBook
   def initialize
     @books = []
+    return unless File.exist?('./books.json')
+
+    book_arr = JSON.parse(File.read('./books.json'))
+    book_arr.each { |book_item| @books << Book.new(book_item['title'], book_item['author']) }
   end
 
   attr_reader :books
@@ -133,12 +137,75 @@ class CRRentals
   end
 end
 
+# AppDataIO class persists and fetches the data
+class AppDataIO
+  def initialize(cr_book, cr_people, cr_rentals)
+    @book_arr = []
+    @people_arr = []
+    @rentals_arr = []
+    @cr_book = cr_book
+    @cr_people = cr_people
+    @cr_rentals = cr_rentals
+  end
+
+  def save_data
+    save_book
+    save_people
+    save_rentals
+  end
+
+  private
+
+  def save_book
+    @cr_book.books.each { |book| @book_arr << { 'title' => book.title, 'author' => book.author } }
+    File.write('./books.json', JSON.dump(@book_arr))
+  end
+
+  def save_people
+    @cr_people.people.each do |person|
+      if person.is_a?(Student)
+        save_student(person)
+      else
+        save_teacher(person)
+      end
+    end
+
+    File.write('./people.json', JSON.dump(@people_arr))
+  end
+
+  def save_rentals
+    @cr_rentals.rentals.each do |rental|
+      @rentals_arr << { 'date' => rental.date, 'book' => rental.book, 'person' => rental.person }
+    end
+
+    File.write('./rentals.json', JSON.dump(@rentals_arr))
+  end
+
+  def save_teacher(person)
+    @people_arr << {
+      'specialization' => person.specialization,
+      'name' => person.name,
+      'age' => person.age
+    }
+  end
+
+  def save_student(person)
+    @people_arr << {
+      'age' => person.age,
+      'name' => person.name,
+      'classroom' => person.classroom,
+      'parent_permission' => person.parent_permission
+    }
+  end
+end
+
 # Detector class indicates what action should be taken based on user input
 class Detector
   def initialize
     @cr_book = CRBook.new
     @cr_people = CRPeople.new
     @cr_rentals = CRRentals.new(@cr_book, @cr_people)
+    @app_data = AppDataIO.new(@cr_book, @cr_people, @cr_rentals)
   end
 
   def detect_operation_person(user_input)
@@ -157,17 +224,11 @@ class Detector
 
   def save_and_exit(user_input)
     if user_input == 7
-      save_data
+      @app_data.save_data
       puts 'Saving and exiting app...'
     else
       puts 'Invalid Input'
     end
-  end
-
-  def save_data
-    File.write('./books.json', JSON.dump(@cr_book.books))
-    File.write('./people.json', JSON.dump(@cr_people.people))
-    File.write('./rentals.json', JSON.dump(@cr_rentals.rentals))
   end
 end
 
