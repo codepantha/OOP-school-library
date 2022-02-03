@@ -9,7 +9,8 @@ require './teacher'
 # CRPeople for create and list persons
 class CRPeople
   def initialize
-    @people = []
+    @app_data = AppDataIO.new 
+    @people = @app_data.read_people
   end
 
   attr_reader :people
@@ -81,9 +82,10 @@ end
 # this class is used to create/read rentals
 class CRRentals
   def initialize(books, people)
+    @appdata = AppDataIO.new
     @books = books
     @people = people
-    @rentals = []
+    @rentals = @appdata.read_rentals
     @book_input = nil
     @person_input = nil
   end
@@ -158,6 +160,26 @@ class AppDataIO
     book_arr = JSON.parse(File.read('./books.json'))
     book_arr.each { |book_item| books << Book.new(book_item['title'], book_item['author']) }
     books
+  end
+
+  def read_people
+    people = []
+    return [] unless File.exist?('./people.json')
+
+    people_arr = JSON.parse(File.read('./people.json'))
+    people_arr.each do |person|
+      person['specialization'] ? people << Teacher.new(person['specialization'], person['name'], person['age']) : people << Student.new(person['age'], person['name'], person['classroom'], parent_permission: person['parent_permission'])
+    end
+    people
+  end
+
+  def read_rentals
+    rentals = []
+    return [] unless File.exist?('./rentals.json')
+
+    rentals_arr = JSON.parse(File.read('./rentals.json'))
+    rentals_arr.each { |rental| rentals << Rental.new(rental['date'], rental['book'], rental['person'])}
+    rentals
   end
 
   private
