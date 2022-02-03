@@ -55,11 +55,8 @@ end
 # CRBOOK for create and read from books
 class CRBook
   def initialize
-    @books = []
-    return unless File.exist?('./books.json')
-
-    book_arr = JSON.parse(File.read('./books.json'))
-    book_arr.each { |book_item| @books << Book.new(book_item['title'], book_item['author']) }
+    @appdata = AppDataIO.new
+    @books = @appdata.read_books
   end
 
   attr_reader :books
@@ -139,7 +136,7 @@ end
 
 # AppDataIO class persists and fetches the data
 class AppDataIO
-  def initialize(cr_book, cr_people, cr_rentals)
+  def initialize(cr_book = {}, cr_people = {}, cr_rentals = {})
     @book_arr = []
     @people_arr = []
     @rentals_arr = []
@@ -152,6 +149,15 @@ class AppDataIO
     save_book
     save_people
     save_rentals
+  end
+
+  def read_books
+    books = []
+    return [] unless File.exist?('./books.json')
+
+    book_arr = JSON.parse(File.read('./books.json'))
+    book_arr.each { |book_item| books << Book.new(book_item['title'], book_item['author']) }
+    books
   end
 
   private
