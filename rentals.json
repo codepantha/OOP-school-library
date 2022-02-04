@@ -1,1 +1,1 @@
-[{"date":"2/2/2022","book":"#<Book:0x000002b7f4f5db20>","person":"#<Student:0x000002b7f4f5d080>"},{"date":"30/12/2021","book":"#<Book:0x000002b7f4f5dbc0>","person":"#<Student:0x000002b7f4f5cf68>"}]
+[{"date":"3/3/3","book":{"title":"dON'T overwrite","author":"Prom"},"person":{"id":99,"age":"Steven","name":"30","specialization":"CS"}},{"date":"1/1/1","book":{"title":"My sixth sense","author":"Codepantherr"},"person":{"id":54,"age":"34","name":"Freya","parent_permission":false}}]

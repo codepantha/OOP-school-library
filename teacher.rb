@@ -1,8 +1,9 @@
+# frozen_string_literal: true
+
 require './person'
 # Teacher class
 class Teacher < Person
-  attr_reader :specialization
-  attr_reader :age
+  attr_reader :specialization, :age
 
   def initialize(specialization, name, age)
     super(name, age)

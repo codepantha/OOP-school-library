@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'json'
 require './person'
 require './book'
@@ -9,7 +11,7 @@ require './teacher'
 # CRPeople for create and list persons
 class CRPeople
   def initialize
-    @app_data = AppDataIO.new 
+    @app_data = AppDataIO.new
     @people = @app_data.read_people
   end
 
@@ -85,7 +87,7 @@ class CRRentals
     @appdata = AppDataIO.new
     @books = books
     @people = people
-    @rentals = @appdata.read_rentals
+    @rentals = []
     @book_input = nil
     @person_input = nil
   end
@@ -168,7 +170,13 @@ class AppDataIO
 
     people_arr = JSON.parse(File.read('./people.json'))
     people_arr.each do |person|
-      person['specialization'] ? people << Teacher.new(person['specialization'], person['name'], person['age']) : people << Student.new(person['age'], person['name'], person['classroom'], parent_permission: person['parent_permission'])
+      people << if person['specialization']
+                  Teacher.new(person['specialization'], person['name'],
+                              person['age'])
+                else
+                  Student.new(person['age'], person['name'], person['classroom'],
+                              parent_permission: person['parent_permission'])
+                end
     end
     people
   end
@@ -178,7 +186,7 @@ class AppDataIO
     return [] unless File.exist?('./rentals.json')
 
     rentals_arr = JSON.parse(File.read('./rentals.json'))
-    rentals_arr.each { |rental| rentals << Rental.new(rental['date'], rental['book'], rental['person'])}
+    rentals_arr.each { |rental| rentals << Rental.new(rental['date'], rental['book'], rental['person']) }
     rentals
   end
 
@@ -203,7 +211,17 @@ class AppDataIO
 
   def save_rentals
     @cr_rentals.rentals.each do |rental|
-      @rentals_arr << { 'date' => rental.date, 'book' => rental.book, 'person' => rental.person }
+      @rentals_arr << {
+        'date' => rental.date,
+        'book' => { 'title' => rental.book.title, 'author' => rental.book.author },
+        'person' => if rental.person.is_a?(Teacher)
+                      { 'id' => rental.person.id, 'age' => rental.person.age,
+                        'name' => rental.person.name, 'specialization' => rental.person.specialization }
+                    else
+                      { 'id' => rental.person.id, 'age' => rental.person.age, 'name' => rental.person.name,
+                        'parent_permission' => rental.person.parent_permission }
+                    end
+      }
     end
 
     File.write('./rentals.json', JSON.dump(@rentals_arr))
