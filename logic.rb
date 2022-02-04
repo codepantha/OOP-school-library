@@ -87,7 +87,7 @@ class CRRentals
     @appdata = AppDataIO.new
     @books = books
     @people = people
-    @rentals = []
+    @rentals = @appdata.read_rentals
     @book_input = nil
     @person_input = nil
   end
@@ -186,7 +186,10 @@ class AppDataIO
     return [] unless File.exist?('./rentals.json')
 
     rentals_arr = JSON.parse(File.read('./rentals.json'))
-    rentals_arr.each { |rental| rentals << Rental.new(rental['date'], rental['book'], rental['person']) }
+    rentals_arr.each do |rental|
+      rentals << Rental.new(rental['date'], Book.new(rental['book']['title'], rental['book']['author']),
+                            rental['person']['specialization'] ? Teacher.new(rental['person']['specialization'], rental['person']['name'], rental['person']['age']) : Student.new(rental['person']['age'], rental['person']['name'], rental['person']['classroom'], 'parent_permission': rental['person']['parent_permission']))
+    end
     rentals
   end
 
