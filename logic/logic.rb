@@ -1,14 +1,12 @@
-require './person'
-require './book'
-require './rental'
-require './classroom'
-require './student'
-require './teacher'
+require 'json'
+Dir['../classes/*.rb'].sort.each { |file| require file }
+require_relative 'app_data_io'
 
-# CRPeople for create and list persons
+# CRPeople for create and list persons1
 class CRPeople
   def initialize
-    @people = []
+    @app_data = AppDataIO.new
+    @people = @app_data.read_people
   end
 
   attr_reader :people
@@ -54,7 +52,8 @@ end
 # CRBOOK for create and read from books
 class CRBook
   def initialize
-    @books = []
+    @appdata = AppDataIO.new
+    @books = @appdata.read_books
   end
 
   attr_reader :books
@@ -79,12 +78,15 @@ end
 # this class is used to create/read rentals
 class CRRentals
   def initialize(books, people)
+    @appdata = AppDataIO.new
     @books = books
     @people = people
-    @rentals = []
+    @rentals = @appdata.read_rentals
     @book_input = nil
     @person_input = nil
   end
+
+  attr_reader :rentals
 
   def ask_for_book_input
     puts 'Select a book from the following list by number: '
@@ -136,6 +138,7 @@ class Detector
     @cr_book = CRBook.new
     @cr_people = CRPeople.new
     @cr_rentals = CRRentals.new(@cr_book, @cr_people)
+    @app_data = AppDataIO.new(@cr_book, @cr_people, @cr_rentals)
   end
 
   def detect_operation_person(user_input)
@@ -150,6 +153,15 @@ class Detector
 
   def detect_operation_rentals(user_input)
     user_input == 5 ? @cr_rentals.create_rental_handler : @cr_rentals.list_rentals_for_a_given_person_id
+  end
+
+  def save_and_exit(user_input)
+    if user_input == 7
+      @app_data.save_data
+      puts 'Saving and exiting app...'
+    else
+      puts 'Invalid Input'
+    end
   end
 end
 
@@ -173,7 +185,7 @@ class MenuOptions
     when 5, 6
       @detector.detect_operation_rentals(user_choice)
     else
-      puts 'Select a valid option'
+      @detector.save_and_exit(user_choice)
     end
   end
 end
