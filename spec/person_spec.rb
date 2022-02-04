@@ -6,7 +6,7 @@ describe Person do
     it 'Should be initialized by age and others are automatically generated' do
       person = Person.new(32)
 
-      person_details = [!person.id.nil?,  person.age, person.name, person.parent_permission]
+      person_details = [!person.id.nil?, person.age, person.name, person.parent_permission]
 
       expect(person_details).to eq [true, 32, 'Unknown', true]
     end
