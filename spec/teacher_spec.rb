@@ -8,7 +8,7 @@ describe Teacher do
 
       teacher_details = [teacher.specialization, teacher.name, teacher.age]
 
-      expect(teacher_details).to eq %w[Physician Mohamed 52]
+      expect(teacher_details).to eq ['Physician', 52, 'Mohamed']
     end
 
     it 'can_use_services? should always return true' do
