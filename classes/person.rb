@@ -1,6 +1,5 @@
-# frozen_string_literal: true
+require_relative 'corrector'
 
-require './corrector'
 # Person class
 class Person
   attr_reader :id, :rentals

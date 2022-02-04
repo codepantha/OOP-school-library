@@ -1,6 +1,4 @@
-# frozen_string_literal: true
-
-require './person'
+require_relative 'person'
 # Student class
 class Student < Person
   attr_reader :classroom, :parent_permission

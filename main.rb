@@ -1,12 +1,5 @@
-# frozen_string_literal: true
-
-require './person'
-require './book'
-require './rental'
-require './classroom'
-require './student'
-require './teacher'
-require './logic'
+Dir['./classes/*.rb'].sort.each { |file| require file }
+require './logic/logic'
 
 def main
   menu_options = MenuOptions.new

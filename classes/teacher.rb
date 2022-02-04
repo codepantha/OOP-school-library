@@ -1,6 +1,4 @@
-# frozen_string_literal: true
-
-require './person'
+require_relative 'person'
 # Teacher class
 class Teacher < Person
   attr_reader :specialization, :age

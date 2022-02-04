@@ -1,12 +1,8 @@
 require 'json'
-require_relative 'person'
-require_relative 'book'
-require_relative 'rental'
-require_relative 'classroom'
-require_relative 'student'
-require_relative 'teacher'
+Dir['../classes/*.rb'].sort.each { |file| require file }
+require_relative 'app_data_io'
 
-# CRPeople for create and list persons
+# CRPeople for create and list persons1
 class CRPeople
   def initialize
     @app_data = AppDataIO.new
