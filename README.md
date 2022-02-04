@@ -11,6 +11,15 @@ You must have Ruby installed on your local machine
 Clone the repo: https://github.com/codepantherr/OOP-school-library.git
 
 
+## To run the project
+
+ruby main.rb
+
+## To test the project
+
+rspec
+
+
 ## Authors
 
 👤 **Codepantherr**
