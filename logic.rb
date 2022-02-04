@@ -157,25 +157,25 @@ class AppDataIO
 
   def read_books
     books = []
-    return [] unless File.exist?('./books.json')
+    return [] unless File.exist?('./data/books.json')
 
-    book_arr = JSON.parse(File.read('./books.json'))
+    book_arr = JSON.parse(File.read('./data/books.json'))
     book_arr.each { |book_item| books << Book.new(book_item['title'], book_item['author']) }
     books
   end
 
   def read_people
     people = []
-    return [] unless File.exist?('./people.json')
+    return [] unless File.exist?('./data/people.json')
 
-    people_arr = JSON.parse(File.read('./people.json'))
+    people_arr = JSON.parse(File.read('./data/people.json'))
     people_arr.each do |person|
       people << if person['specialization']
                   Teacher.new(person['specialization'], person['name'],
-                              person['age'])
+                              person['age'], person['id'])
                 else
                   Student.new(person['age'], person['name'], person['classroom'],
-                              parent_permission: person['parent_permission'])
+                              person['id'], parent_permission: person['parent_permission'])
                 end
     end
     people
@@ -183,12 +183,12 @@ class AppDataIO
 
   def read_rentals
     rentals = []
-    return [] unless File.exist?('./rentals.json')
+    return [] unless File.exist?('./data/rentals.json')
 
-    rentals_arr = JSON.parse(File.read('./rentals.json'))
+    rentals_arr = JSON.parse(File.read('./data/rentals.json'))
     rentals_arr.each do |rental|
       rentals << Rental.new(rental['date'], Book.new(rental['book']['title'], rental['book']['author']),
-                            rental['person']['specialization'] ? Teacher.new(rental['person']['specialization'], rental['person']['name'], rental['person']['age']) : Student.new(rental['person']['age'], rental['person']['name'], rental['person']['classroom'], 'parent_permission': rental['person']['parent_permission']))
+                            rental['person']['specialization'] ? Teacher.new(rental['person']['specialization'], rental['person']['name'], rental['person']['age'], rental['person']['id']) : Student.new(rental['person']['age'], rental['person']['name'], rental['person']['classroom'], rental['person']['id'], 'parent_permission': rental['person']['parent_permission']))
     end
     rentals
   end
@@ -197,7 +197,7 @@ class AppDataIO
 
   def save_book
     @cr_book.books.each { |book| @book_arr << { 'title' => book.title, 'author' => book.author } }
-    File.write('./books.json', JSON.dump(@book_arr))
+    File.write('./data/books.json', JSON.dump(@book_arr))
   end
 
   def save_people
@@ -209,7 +209,7 @@ class AppDataIO
       end
     end
 
-    File.write('./people.json', JSON.dump(@people_arr))
+    File.write('./data/people.json', JSON.dump(@people_arr))
   end
 
   def save_rentals
@@ -217,21 +217,30 @@ class AppDataIO
       @rentals_arr << {
         'date' => rental.date,
         'book' => { 'title' => rental.book.title, 'author' => rental.book.author },
-        'person' => if rental.person.is_a?(Teacher)
-                      { 'id' => rental.person.id, 'age' => rental.person.age,
-                        'name' => rental.person.name, 'specialization' => rental.person.specialization }
-                    else
-                      { 'id' => rental.person.id, 'age' => rental.person.age, 'name' => rental.person.name,
-                        'parent_permission' => rental.person.parent_permission }
-                    end
+        'person' => rental.person.is_a?(Teacher) ? rental_teacher_details(rental) : rental_student_details(rental)
       }
     end
 
-    File.write('./rentals.json', JSON.dump(@rentals_arr))
+    File.write('./data/rentals.json', JSON.dump(@rentals_arr))
+  end
+
+  def rental_teacher_details(rental)
+    {
+      'id' => rental.person.id, 'age' => rental.person.age,
+      'name' => rental.person.name, 'specialization' => rental.person.specialization
+    }
+  end
+
+  def rental_student_details(rental)
+    {
+      'id' => rental.person.id, 'age' => rental.person.age, 'name' => rental.person.name,
+      'parent_permission' => rental.person.parent_permission 
+    }
   end
 
   def save_teacher(person)
     @people_arr << {
+      'id' => person.id,
       'specialization' => person.specialization,
       'name' => person.name,
       'age' => person.age
@@ -240,6 +249,7 @@ class AppDataIO
 
   def save_student(person)
     @people_arr << {
+      'id' => person.id,
       'age' => person.age,
       'name' => person.name,
       'classroom' => person.classroom,
